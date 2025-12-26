@@ -1,5 +1,6 @@
 import os
 
+
 class AppConfig:
     def __init__(self):
         self.ip = os.getenv('IP')
