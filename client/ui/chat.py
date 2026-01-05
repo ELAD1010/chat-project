@@ -1,10 +1,16 @@
+import asyncio
+
 from nicegui import app, ui
 from login_ui import build_login_page
-from app_state import selected_chat
+from register_ui import build_register_page
+from authentication import login as auth_login
+from authentication import register as auth_register
+from app_state import load_chat_data, loading_state, selected_chat
 from styles import apply_global_css, set_body_background
-from sidebar import build_sidebar
+from sidebar import build_sidebar, render_chat_lists
 from bottom_input_bar import build_bottom_input_bar
 from chat_layout import build_chat_content
+from loading_ui import build_loading_screen
 
 # --- SETUP BACKGROUND ---
 app.add_static_files('/static', 'client/ui/assets')
@@ -32,13 +38,63 @@ def render_messages(*, scroll_to_bottom: bool = True) -> None:
 def _show_app() -> None:
     try:
         login_view.classes(add='hidden')
+        register_view.classes(add='hidden')
+        loading_view.classes(add='hidden')
         app_view.classes(remove='hidden')
     except Exception:
         pass
 
 
+def _on_auth_success(result: dict) -> None:
+    # Show loading screen immediately, then load data asynchronously.
+    loading_state['value'] = True
+    try:
+        login_view.classes(add='hidden')
+        register_view.classes(add='hidden')
+        app_view.classes(add='hidden')
+        loading_view.classes(remove='hidden')
+    except Exception:
+        pass
+
+    async def _load() -> None:
+        # TESTING ONLY: simulate network delay; remove once real API is wired.
+        await asyncio.sleep(2)
+
+        user_id = (result.get('user_id') or 'demo')
+        load_chat_data(str(user_id))
+        if sidebar_refs:
+            render_chat_lists(chat_list_containers=sidebar_refs.chat_list_containers, on_select_chat=select_chat)
+        _show_app()
+
+    asyncio.create_task(_load())
+
+
+def _show_login() -> None:
+    try:
+        register_view.classes(add='hidden')
+        loading_view.classes(add='hidden')
+        login_view.classes(remove='hidden')
+    except Exception:
+        pass
+
+
+def _show_register() -> None:
+    try:
+        login_view.classes(add='hidden')
+        loading_view.classes(add='hidden')
+        register_view.classes(remove='hidden')
+    except Exception:
+        pass
+
+
 # Login page is the default entry for now
-login_view = build_login_page(on_login=_show_app)
+login_view = build_login_page(on_login=auth_login, on_success=_on_auth_success, on_show_register=_show_register)
+register_view = build_register_page(on_register=auth_register, on_success=_on_auth_success, on_show_login=_show_login)
+register_view.classes(add='hidden')
+
+# Loading screen (hidden by default)
+loading_view = build_loading_screen()
+loading_view.classes(add='hidden')
 
 # Chat app view (hidden until login)
 app_view = ui.element('div').classes('w-full h-screen overflow-hidden hidden').style(
