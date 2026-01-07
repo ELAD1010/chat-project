@@ -8,8 +8,8 @@ from server.db.db_manager import Base
 
 class Message(Base):
     __tablename__ = 'messages'
-    id = Column(CHAR(50), primary_key=True, default=uuid.uuid4)
+    id: Mapped[uuid.UUID] = Column(Uuid, primary_key=True, default=uuid.uuid4)
+    conversation_id = Column(CHAR(50),ForeignKey("conversations.id"))
     sender_id: Mapped[uuid.UUID] = Column(Uuid, ForeignKey("users.id"))
-    receiver_id:  Mapped[uuid.UUID] = Column(Uuid, ForeignKey("users.id"))
     content = Column(String(255))
-    timestamp = Column(DateTime(timezone=True), default=datetime.now)
+    created_at = Column(DateTime(timezone=True), default=datetime.now)

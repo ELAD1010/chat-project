@@ -1,8 +1,9 @@
 from datetime import datetime
 import uuid
 from sqlalchemy import Column, String, DateTime, Uuid
-from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import relationship, Mapped
 from server.db.db_manager import Base
+
 
 class User(Base):
     __tablename__ = 'users'
@@ -10,3 +11,6 @@ class User(Base):
     username = Column(String(80))
     password = Column(String(255))
     created_at = Column(DateTime(timezone=True), default=datetime.now)
+    conversations: Mapped[list["ConversationMembers"]] = relationship(
+        back_populates="user",
+    )
