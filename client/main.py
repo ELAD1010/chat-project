@@ -68,10 +68,10 @@ def main():
     threading.Thread(target=recv, args=(cli_sock,), daemon=True).start()
 
     while True:
-        dest_client_id = input("Enter client ID\r\n")
+        dest_conversation_id = input("Enter Conversation ID\r\n")
         text = input("Enter your message\r\n")
-        dest_client_uuid = UUID(dest_client_id)
-        message = Message(sender_id=user_id, receiver_id=dest_client_uuid, content=text)
+        dest_conversation_uuid = UUID(dest_conversation_id)
+        message = Message(sender_id=user_id, conversation_id=dest_conversation_uuid, content=text)
         data = json.dumps(message, default=lambda obj: obj.__dict__())
         cli_sock.send(data.encode())
 

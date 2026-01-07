@@ -36,7 +36,9 @@ def main():
         cli_sock, address = server_sock.accept()
 
         temp_socket_id = uuid4()
-        client_stream = ClientStream(address, cli_sock, connection_manager.active_connections)
+        client_stream = ClientStream(address, cli_sock, connection_manager)
+        client_stream.set_user_id(temp_socket_id)
+
         connection_manager.add_client(temp_socket_id, client_stream)
         init_msg = json.dumps({"type": "HANDSHAKE", "socket_id": str(temp_socket_id)})
         cli_sock.send(init_msg.encode())

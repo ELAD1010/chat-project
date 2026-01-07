@@ -3,29 +3,33 @@ import socket
 import json
 from queue import Queue
 from auxiliary.message import Message
-from uuid import UUID
+from server.connection_manager import ConnectionManager
 
 BUFFER_SIZE = 1024
 
 
 class ClientStream:
-    def __init__(self, address, cli_sock, clients_dict: dict[UUID, "ClientStream"]):
+    def __init__(self, address, cli_sock, connection_manager: ConnectionManager):
         self.ip = address[0]
         self.port = address[1]
         self.cli_sock: socket.socket = cli_sock
-        self.clients_dict = clients_dict
+        self.connection_manager = connection_manager
+        self.user_id = None
         self.out_queue = Queue()
 
         # Daemon threads so Ctrl+C can terminate the process immediately.
         threading.Thread(target=self.receive, daemon=True).start()
         threading.Thread(target=self.send, daemon=True).start()
 
+    def set_user_id(self, user_id):
+        self.user_id = user_id
+
     def cleanup_connection(self):
         self.cli_sock.shutdown(socket.SHUT_RDWR)
         self.cli_sock.close()
-        for client_id in self.clients_dict:
-            if self.clients_dict == self.clients_dict[client_id]:
-                del self.clients_dict[client_id]
+
+        if self.user_id:
+            self.connection_manager.remove_client(self.user_id)
 
         self.out_queue.put(None)  # Send signal to the send thread to be killed
 
@@ -39,8 +43,12 @@ class ClientStream:
                     break
 
                 message = Message.from_json(data.decode())
-                dest_client = self.clients_dict[message.receiver_id]
-                dest_client.out_queue.put(message)
+
+                target_streams = self.connection_manager.get_room_members(message.conversation_id)
+
+                for stream in target_streams:
+                    if stream.user_id != self.user_id:
+                        stream.out_queue.put(message)
 
             except ConnectionResetError:
                 # Handle abrupt os disconnection error
