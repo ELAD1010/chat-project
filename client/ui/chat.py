@@ -86,7 +86,6 @@ def _show_register() -> None:
     except Exception:
         pass
 
-
 # Login page is the default entry for now
 login_view = build_login_page(on_login=auth_login, on_success=_on_auth_success, on_show_register=_show_register)
 register_view = build_register_page(on_register=auth_register, on_success=_on_auth_success, on_show_login=_show_login)
@@ -122,3 +121,4 @@ with app_view:
             )
 
 ui.run(native=True, window_size=(1500, 750), title="Rift")
+   

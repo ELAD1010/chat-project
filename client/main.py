@@ -4,76 +4,68 @@ import threading
 import json
 import requests
 from dotenv import load_dotenv
-from uuid import UUID
 from auxiliary.message import Message
 from client.config.app_config import AppConfig
+from datetime import datetime
 
+load_dotenv()
 
-def login(socket_id):
-    username = input("Enter your username")
-    res = requests.post('http://127.0.0.1:5000/users/login',
-                              data={"username": username, "password": "1234", "socket_id": socket_id})
+socket_id = None
+app_config = AppConfig()
+client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+def initialize_connection():
+    client_socket.connect((app_config.ip, app_config.port))
+
+    handshake_data = client_socket.recv(1024).decode()
+    handshake = json.loads(handshake_data)
+    socket_id = handshake['socket_id']
+    return socket_id
+
+def login(username, password: str):
+    res = requests.post(f'http://{app_config.ip}:{app_config.http_port}/users/login',
+                              data={"username": username, "password": password, "socket_id": socket_id})
     client_id = res.json()['user_id']
-    print(client_id)
     return client_id
 
-
-def register(socket_id):
-    username = input("Enter your username")
-    res = requests.post('http://127.0.0.1:5000/users/register',
-                              data={"username": username, "password": "1234", "socket_id": socket_id})
+def register(username, password):
+    res = requests.post(f'http://{app_config.ip}:{app_config.http_port}/users/register',
+                              data={"username": username, "password": password, "socket_id": socket_id})
     client_id = res.json()['user_id']
-    print(client_id)
     return client_id
 
+def send(message:str, sender_id: str,conversation_id: str):
+    message_data = {
+        "sender_id": sender_id,
+        "conversation_id": conversation_id,
+        "content": message,
+        "timestamp": datetime.now().isoformat()
+    }
+    client_socket.send(json.dumps(message_data).encode())
 
-def recv(cli_sock):
+def recv():
     while True:
         try:
-            data = cli_sock.recv(1024)
+            data = client_socket.recv(1024)
             if not data:
                 print("Disconnected from server")
-                cli_sock.close()
+                client_socket.close()
                 break
 
             message = Message.from_json(data.decode())
             print(message)
         except Exception as e:
             print(f"Error receiving data: {e}")
-            cli_sock.close()
+            client_socket.close()
             break
 
     os._exit(0)
 
 
 def main():
-    load_dotenv()
-    app_config = AppConfig()
-    cli_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    cli_sock.connect((app_config.ip, app_config.port))
-
-    handshake_data = cli_sock.recv(1024).decode()
-    handshake = json.loads(handshake_data)
-    socket_id = handshake['socket_id']
-
-    action = input("login/register(L/R)")
-    if action == 'L':
-        user_id = login(socket_id)
-    elif action == 'R':
-        user_id = register(socket_id)
-    else:
-        cli_sock.close()
-        return
-
-    threading.Thread(target=recv, args=(cli_sock,), daemon=True).start()
-
-    while True:
-        dest_conversation_id = input("Enter Conversation ID\r\n")
-        text = input("Enter your message\r\n")
-        dest_conversation_uuid = UUID(dest_conversation_id)
-        message = Message(sender_id=user_id, conversation_id=dest_conversation_uuid, content=text)
-        data = json.dumps(message, default=lambda obj: obj.__dict__())
-        cli_sock.send(data.encode())
+    global socket_id
+    # Needs to be executed first
+    socket_id = initialize_connection()
 
 
 if __name__ == '__main__':
