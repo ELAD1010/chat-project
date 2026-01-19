@@ -18,7 +18,7 @@ class MessageService:
     def create_message(self, message: message.Message):
         with self.db as session:
             db_message = Message(content=message.content, sender_id=message.sender_id,
-                                 conversation_id="face2d8390a84b53a9bb1e87064eeaf8")
+                                 conversation_id=message.conversation_id, created_at=message.created_at)
             session.add(db_message)
             session.flush()
-            return db_message
+            return model_to_dict(db_message)

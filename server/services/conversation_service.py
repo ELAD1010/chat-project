@@ -26,16 +26,40 @@ class ConversationService:
 
                 # Manually Convert and Add the related Conversation object
                 if conversation.conversation:
-                    conversation_dict['conversation'] = model_to_dict(conversation.conversation)
+                    conversation_dict = {**conversation_dict, **model_to_dict(conversation.conversation)}
+                    del conversation_dict['conversation_id']  # Remove redundant field
                     members = []
                     for member in conversation.conversation.members:
+                        if user_id == member.user_id:
+                            continue  # Skip adding the requesting user to the members list
                         member_dict = model_to_dict(member.user)
                         members.append({"user_id": member_dict['id'], "username": member_dict['username']})
-                    conversation_dict['conversation']['members'] = members
+                    conversation_dict['members'] = members
 
                 results.append(conversation_dict)
 
             return results
+
+    def get_conversation_by_id(self, conversation_id: str, user_id: str = None):
+        with self.db as session:
+            conversation = session.query(Conversation) \
+                .options(selectinload(Conversation.members).joinedload(ConversationMembers.user)) \
+                .filter(Conversation.id == uuid.UUID(conversation_id)) \
+                .first()
+
+            if not conversation:
+                return None
+
+            conversation_dict = model_to_dict(conversation)
+            members = []
+            for member in conversation.members:
+                if user_id and uuid.UUID(user_id) == member.user_id:
+                    continue
+                member_dict = model_to_dict(member.user)
+                members.append({"user_id": member_dict['id'], "username": member_dict['username']})
+            
+            conversation_dict['members'] = members
+            return conversation_dict
 
     def create_conversation(self, conversation_type: ConversationType, members: list[str], conversation_name: str = None):
         with self.db as session:

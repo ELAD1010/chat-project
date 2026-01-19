@@ -4,17 +4,17 @@ import json
 from queue import Queue
 from auxiliary.message import Message
 from server.connection_manager import ConnectionManager
+from server.services.message_service import MessageService
 
 BUFFER_SIZE = 1024
-
-
 class ClientStream:
-    def __init__(self, address, cli_sock, connection_manager: ConnectionManager):
+    def __init__(self, address, cli_sock, connection_manager: ConnectionManager, message_service: MessageService):
         self.ip = address[0]
         self.port = address[1]
         self.cli_sock: socket.socket = cli_sock
         self.connection_manager = connection_manager
         self.user_id = None
+        self.message_service = message_service
         self.out_queue = Queue()
 
         # Daemon threads so Ctrl+C can terminate the process immediately.
@@ -41,9 +41,11 @@ class ClientStream:
                     print("Client disconnected cleanly")
                     self.cleanup_connection()
                     break
-
+                
                 message = Message.from_json(data.decode())
-
+                db_message = self.message_service.create_message(message)
+                message.id = db_message['id']
+                
                 target_streams = self.connection_manager.get_room_members(message.conversation_id)
 
                 for stream in target_streams:

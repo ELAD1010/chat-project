@@ -4,7 +4,7 @@ from typing import Callable, Optional
 
 from nicegui import ui
 
-from auth_page import AuthTheme, build_auth_page
+from client.ui.auth_page import AuthTheme, build_auth_page
 
 
 def build_login_page(

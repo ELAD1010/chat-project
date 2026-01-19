@@ -8,6 +8,8 @@ CHATS: list[dict] = []
 # --- UI state (kept as dicts to preserve existing semantics) ---
 # No chat selected by default: show welcome screen until the user clicks a chat.
 selected_chat = {'id': None}
+current_user_id = {'value': None}
+current_username = {'value': ''}
 chat_search = {'value': ''}
 chat_messages: dict[str, list[dict]] = {}
 loading_state = {'value': False}
@@ -15,7 +17,7 @@ loading_state = {'value': False}
 
 def load_chat_data(user_id: str) -> None:
     """Load chats list + messages into app_state using fetch_chat_data dummy layer."""
-    from fetch_chat_data import fetch_chat_messages, fetch_chats_list
+    from client.ui.fetch_chat_data import fetch_chat_messages, fetch_chats_list
 
     chats = fetch_chats_list(user_id)
     CHATS.clear()
