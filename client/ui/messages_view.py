@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 from nicegui import ui
 
-from app_state import chat_messages, selected_chat
+from client.ui.app_state import chat_messages, selected_chat
 
 
 @dataclass
@@ -52,16 +52,14 @@ def render_messages(refs: MessagesRefs, *, scroll_to_bottom: bool = True) -> Non
                         stamp=_stamp_with_status(m),
                     ).props('bg-color="white" text-color="black" size="md"') \
                         .classes('text-sm md:text-base lg:text-lg')
-
-    # auto-scroll to bottom (scrollbar hidden but scrolling still works)
     if scroll_to_bottom:
         try:
-            ui.run_javascript("""
-                const el = document.getElementById('message-scroll');
-                if (el) { el.scrollTop = el.scrollHeight; }
-            """)
-        except AssertionError:
-            # Happens during startup when NiceGUI's event loop isn't ready yet.
+            with refs.messages_list:
+                ui.run_javascript("""
+                    const el = document.getElementById('message-scroll');
+                    if (el) { el.scrollTop = el.scrollHeight; }
+                """)
+        except (AssertionError, RuntimeError):
             pass
 
 

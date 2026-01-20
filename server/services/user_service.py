@@ -1,6 +1,6 @@
 from server.db.db_manager import DBManager
 from server.db.models import User
-
+from server.utils import model_to_dict
 
 class UserService:
     def __init__(self):
@@ -8,7 +8,9 @@ class UserService:
 
     def get_users(self):
         with self.db as session:
-            return session.query(User).all()
+            db_users = session.query(User).all()
+            users = [model_to_dict(u) for u in db_users]
+            return users
 
     def get_user_by_username(self, username):
         with self.db as session:

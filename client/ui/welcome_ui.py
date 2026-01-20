@@ -10,7 +10,7 @@ def build_welcome_view(
     title: str = "Welcome",
     subtitle: str = "We missed you!",
     logo_svg_path: str | None = None,
-) -> ui.element:
+) -> tuple[ui.element, ui.label]:
     """Build the right-side welcome screen (WhatsApp Web style).
 
     Note: This intentionally uses a solid background (no wallpaper SVG decoration).
@@ -34,8 +34,8 @@ def build_welcome_view(
             if svg:
                 ui.html(svg, sanitize=False).classes("w-16 h-16 opacity-90")
             ui.label(title).classes("text-white text-4xl font-semibold tracking-tight")
-            ui.label(subtitle).classes("text-gray-400 text-lg")
+            subtitle_label = ui.label(subtitle).classes("text-gray-400 text-lg")
 
-    return root
+    return root, subtitle_label
 
 

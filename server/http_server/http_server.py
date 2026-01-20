@@ -19,9 +19,7 @@ connection_manager = ConnectionManager()
 @app.get('/users')
 def get_users():
     users = user_service.get_users()
-    return users
-    # Convert list of User objects to list of dicts
-    return jsonify([model_to_dict(u) for u in users])
+    return jsonify(users)
 
 
 @app.get('/users/<user_id>')
@@ -72,23 +70,32 @@ def login():
 
     user_conversations = conversation_service.get_conversations_by_user_id(user.id)
 
-    conversations_ids = [conversation['conversation_id'] for conversation in user_conversations]
+    conversations_ids = [conversation['id'] for conversation in user_conversations]
     connection_manager.bulk_join_rooms(user.id, conversations_ids)
 
     return jsonify({
         "message": "Login successful",
-        "user_id": user.id
+        "user_id": user.id,
     }), 200
 
 @app.get('/messages/<conversation_id>')
 def get_conversation_messages(conversation_id):
-    messages = message_service.get_messages_by_conversation_id(conversation_id)
+    messages = message_service.get_messages_by_conversation_id(uuid.UUID(conversation_id))
     return jsonify(messages)
 
 @app.get('/conversations/<user_id>')
 def get_user_conversations(user_id):
     conversations = conversation_service.get_conversations_by_user_id(uuid.UUID(user_id))
     return jsonify(conversations)
+
+@app.get('/conversation/<conversation_id>')
+def get_conversation(conversation_id):
+    # Optional: get user_id from query param to filter 'members'
+    user_id = request.args.get('user_id')
+    conversation = conversation_service.get_conversation_by_id(conversation_id, user_id)
+    if conversation:
+        return jsonify(conversation)
+    return jsonify({"error": "Conversation not found"}), 404
 
 @app.post('/conversations')
 def create_conversation():

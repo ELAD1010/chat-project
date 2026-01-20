@@ -9,13 +9,16 @@ from server.stream.client_stream import ClientStream
 from server.db.db_manager import DBManager
 from server.http_server.http_server import run_http_server
 from server.connection_manager import ConnectionManager
-
+from server.services.message_service import MessageService
 
 def main():
     load_dotenv()
     app_config: AppConfig = AppConfig()
 
     db = DBManager(app_config.db_name)
+
+    message_service = MessageService()  
+
     db.create_tables()
 
     http_thread = threading.Thread(
@@ -36,7 +39,7 @@ def main():
         cli_sock, address = server_sock.accept()
 
         temp_socket_id = uuid4()
-        client_stream = ClientStream(address, cli_sock, connection_manager)
+        client_stream = ClientStream(address, cli_sock, connection_manager, message_service)
         client_stream.set_user_id(temp_socket_id)
 
         connection_manager.add_client(temp_socket_id, client_stream)

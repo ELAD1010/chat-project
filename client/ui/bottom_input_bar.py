@@ -5,8 +5,8 @@ from typing import Callable
 
 from nicegui import ui
 
-from category_svgs import CATEGORY_SVGS
-from emoji_data import EMOJI_ALIASES, EMOJI_CATEGORIES
+from client.ui.category_svgs import CATEGORY_SVGS
+from client.ui.emoji_data import EMOJI_ALIASES, EMOJI_CATEGORIES
 
 
 @dataclass
