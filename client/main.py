@@ -156,8 +156,7 @@ def recv():
             print(f"Error receiving data: {e}")
             client_socket.close()
             break
-    
-    app.shutdown()
+
     os._exit(0)
 
 
