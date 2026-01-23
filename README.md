@@ -23,7 +23,7 @@ Rift is a Python-based chat project with:
 
 - `server/`: socket server + Flask HTTP server + DB services
 - `client/ui/`: NiceGUI UI app
-- `client/main.py`: CLI socket client (separate from the UI)
+- `client/main.py`: Main client application entry point (connects UI & Sockets)
 - `run_server.py`: server entrypoint
 - `run_client.py`: CLI client entrypoint
 
@@ -56,10 +56,10 @@ source .venv/bin/activate
 
 ### 2) Install dependencies
 
-This repo currently doesn’t ship a `requirements.txt`, so install the core libraries manually:
+Run the following command in your terminal to install all the necessary libraries.
 
 ```bash
-pip install nicegui flask sqlalchemy python-dotenv requests
+pip install -r requirements.txt
 ```
 
 ---
@@ -96,38 +96,53 @@ This starts:
 - a TCP socket server at `IP:PORT`
 - a Flask API at `http://IP:HTTP_PORT`
 
-### 2) Start the UI (NiceGUI desktop app)
 
-In a new terminal:
+### 2) Run the client
+Run the following command in a separate terminal:
 
-```bash
-python client/ui/chat.py
-```
-
-You’ll land on the **Login** page by default.  
-Successful auth shows a short **loading screen**, then the **Chats** UI.
-
-### (Optional) Run the CLI socket client
-
-In a new terminal:
-
-```bash
+```python
 python run_client.py
 ```
+You should see the UI open up a few moments after executing this. 
+You will land on the login page:
 
----
+![loginpage](/readme-images/loginpage.png)
 
-## Notes / Current Behavior
+In the bottom of the form, you will find the *Register Now* button. It will redirect you to the register page.
 
-- Auth functions are currently **dummy** and live in `client/ui/authentication.py`.
-- Chat list + message data are currently **dummy** and live in `client/ui/fetch_chat_data.py`.
-- The UI is modularized under `client/ui/` (see `client/ui/UI_FOLDER_SUMMARY.txt` for per-file details).
+![registerpage](/readme-images/registerpage.png)
 
----
+Fill out your email and password, and click the *register* button.
+
+Great job! You are now successfully a Rift user!
+
+After clicking register, you will be directed to the chat app, as demonstrated in the figure below.
+
+![welcome-page](/readme-images/welcome-page.png)
+
+For now, you don't see any open chats. That's alright, because you simply haven't initiated any conversation!
+
+To start a new conversation, press the "+" button at the top of the left sidebar. 
+A modal should appear with a list of existing users.
+
+![users-choose](/readme-images/chat-lists.png)
+
+Choose a user to start a new conversation with them.
+
+You can send messages via the bottom input bar.
+
+![messages](/readme-images/messages.png)
+
+You could also share different emojis. To do that, click the smiley icon at the bottom input bar. It will open an emoji picker. We are also working on adding support for GIFs, so stay tuned for version updates.
+
+![emoji-picker](/readme-images/emoji-picker.png)
+
 
 ## Troubleshooting
 
-- **App can’t connect / wrong ports**: double-check `.env` values and that `run_server.py` is running.
-- **PowerShell activation blocked**: run `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` once, then re-activate the venv.
-- **Module import errors in UI**: make sure you run it as `python client/ui/chat.py` from the repo root (or run it directly from that folder).
+- **App can’t connect / wrong ports**: Double-check `.env` values and that `run_server.py` is running.
+- **Connecting from another PC**: Ensure your server binds to `0.0.0.0` (in `.env`) and that your firewall allows traffic on the configured ports.
+- **PowerShell activation blocked**: Run `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` once, then re-activate the venv.
+- **Module import errors**: Always run the app using `python run_client.py` from the root directory.
+
 
