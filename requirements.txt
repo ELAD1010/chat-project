@@ -1,0 +1,6 @@
+flask
+nicegui
+sqlalchemy
+python-dotenv
+requests
+pywebview
