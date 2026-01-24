@@ -66,14 +66,9 @@ pip install -r requirements.txt
 
 ## Environment Variables
 
-Create a `.env` file in the project root:
+You can configure the client/sever settings with the appropriate .env files in the cilent and server folders, respectively.
 
-```env
-IP=127.0.0.1
-PORT=5001
-HTTP_PORT=5000
-DB_NAME=rift
-```
+You can configure the following properties depending on your setup.
 
 - **`IP`**: bind/target address
 - **`PORT`**: TCP socket server port
