@@ -1,0 +1,13 @@
+message_id,app_protocol,src_port,dst_port,message,timestamp
+1,HTTP,54102,80,GET /index.html HTTP/1.1\r\nHost: example.com\r\nUser-Agent: Mozilla/5.0,2025-10-27T10:00:01.100Z
+2,HTTP,80,54102,HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: 145\r\n\r\n<html><head><title>Home</title></head><body>Welcome</body></html>,2025-10-27T10:00:01.150Z
+3,HTTP,54102,80,GET /css/styles.css HTTP/1.1\r\nHost: example.com\r\nReferer: http://example.com/index.html,2025-10-27T10:00:01.200Z
+4,HTTP,80,54102,HTTP/1.1 200 OK\r\nContent-Type: text/css\r\n\r\nbody { background-color: #f0f0f0; font-family: sans-serif; },2025-10-27T10:00:01.240Z
+5,HTTP,54102,80,GET /js/app.js HTTP/1.1\r\nHost: example.com\r\nConnection: keep-alive,2025-10-27T10:00:01.250Z
+6,HTTP,80,54102,HTTP/1.1 200 OK\r\nContent-Type: application/javascript\r\n\r\nconsole.log('App loaded');,2025-10-27T10:00:01.290Z
+7,HTTP,54102,80,"POST /api/login HTTP/1.1\r\nHost: example.com\r\nContent-Type: application/json\r\n\r\n{""username"":""admin"",""password"":""1234""}",2025-10-27T10:00:05.000Z
+8,HTTP,80,54102,"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nSet-Cookie: session_id=xyz789\r\n\r\n{""success"":true,""token"":""abc-123""}",2025-10-27T10:00:05.120Z
+9,HTTP,54102,80,GET /api/user/profile HTTP/1.1\r\nHost: example.com\r\nCookie: session_id=xyz789,2025-10-27T10:00:05.500Z
+10,HTTP,80,54102,"HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n{""id"":1,""name"":""Alice"",""role"":""admin""}",2025-10-27T10:00:05.580Z
+11,HTTP,54102,80,"GET /favicon.ico HTTP/1.1\r\nHost: example.com\r\nAccept: image/avif,image/webp,*/*",2025-10-27T10:00:06.000Z
+12,HTTP,80,54102,HTTP/1.1 404 Not Found\r\nContent-Type: text/plain\r\n\r\nResource not found,2025-10-27T10:00:06.050Z
